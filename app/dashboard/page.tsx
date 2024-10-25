@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Container, Title, Button, Group, Text, Card, Table } from '@mantine/core';
 import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
@@ -25,6 +26,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
+  const router = useRouter();
 
   useEffect(() => {
     fetchPdfFiles();
@@ -113,27 +115,32 @@ export default function Dashboard() {
 
   async function handleLogout() {
     const { error } = await supabase.auth.signOut();
-    if (error) console.error(error);
+    if (error) {
+      console.error(error);
+    } else {
+      // Redirigir a la página de inicio después de cerrar la sesión
+      router.push('/');
+    }
   }
 
   return (
     <Container>
       <Group align="apart" mb="md">
         <Title order={1}>Dashboard</Title>
-        <Button onClick={handleLogout}>Cerrar Sesion</Button>
+        <Button onClick={handleLogout}>Sign out</Button>
       </Group>
       <Dropzone onDrop={handleUpload} accept={[MIME_TYPES.pdf]}>
-        <Text style={{ textAlign: 'center' }}>Arrastra el PDF o da click para selecionarlo</Text>
+        <Text style={{ textAlign: 'center' }}>Drag PDF files here or click to select files</Text>
       </Dropzone>
       <Table mt="md">
         <thead>
           <tr>
-            <th>Nombre de Archivo</th>
-            <th>Fecha de Creacion</th>
-            <th>Creado por</th>
-            <th>Fecha de Modificaicon</th>
-            <th>Estado de Firma</th>
-            <th>Acciones</th>
+            <th>File Name</th>
+            <th>Uploaded At</th>
+            <th>Uploaded By</th>
+            <th>Modified At</th>
+            <th>Signature Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
