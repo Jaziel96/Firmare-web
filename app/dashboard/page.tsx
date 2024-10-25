@@ -3,38 +3,31 @@
 import { useState, useEffect } from 'react';
 import { Container, Title, Button, Group, Text, Card } from '@mantine/core';
 import dynamic from 'next/dynamic';
-import { Dropzone } from '@mantine/dropzone';
-import { MIME_TYPES } from '@mantine/dropzone';
+import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { supabase } from '@/lib/supabase';
-import { pdfjs } from 'react-pdf';
-
-// Configurar el trabajador de pdfjs
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const Document = dynamic(() => import('react-pdf').then(mod => mod.Document), { ssr: false });
 const Page = dynamic(() => import('react-pdf').then(mod => mod.Page), { ssr: false });
 
-interface FileObject {
-  name: string;
-  // Agrega otras propiedades si es necesario
-}
-
 export default function Dashboard() {
-  const [pdfFiles, setPdfFiles] = useState<FileObject[]>([]);
+  const [pdfFiles, setPdfFiles] = useState<{ name: string }[]>([]);
   const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
 
   useEffect(() => {
+    async function loadPDFWorker() {
+      const { pdfjs } = await import('react-pdf');
+      pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+
+    }
+    loadPDFWorker();
     fetchPdfFiles();
   }, []);
 
   async function fetchPdfFiles() {
     const { data, error } = await supabase.storage.from('pdfs').list();
-    if (error) {
-      console.error(error);
-    } else {
-      setPdfFiles(data);
-    }
+    if (error) console.error(error);
+    else setPdfFiles(data);
   }
 
   async function handleUpload(files: File[]) {
@@ -60,7 +53,7 @@ export default function Dashboard() {
         <Button onClick={handleLogout}>Sign out</Button>
       </Group>
       <Dropzone onDrop={handleUpload} accept={[MIME_TYPES.pdf]}>
-        <Text style={{ textAlign: 'center' }}>Drag PDF files here or click to select files</Text>
+        <Text >Drag PDF files here or click to select files</Text>
       </Dropzone>
       <Group mt="md">
         {pdfFiles.map((file) => (
@@ -73,10 +66,14 @@ export default function Dashboard() {
       {selectedPdf && (
         <Card mt="md" shadow="sm" padding="lg">
           <Title order={2}>Viewing: {selectedPdf}</Title>
-          <Document file={`${supabase.storage.from('pdfs').getPublicUrl(selectedPdf).data.publicUrl}`}>
+          <Document
+            file={`${supabase.storage.from('pdfs').getPublicUrl(selectedPdf).data.publicUrl}`}
+          >
             <Page pageNumber={1} />
           </Document>
-          <Button mt="md" onClick={() => setSelectedPdf(null)}>Close</Button>
+          <Button mt="md" onClick={() => setSelectedPdf(null)}>
+            Close
+          </Button>
         </Card>
       )}
     </Container>

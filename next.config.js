@@ -1,7 +1,7 @@
 // next.config.js
 module.exports = {
   webpack: (config) => {
-    config.resolve.fallback = { fs: false, path: false }; // Evita errores con módulos no soportados en navegador
+    config.resolve.fallback = { fs: false, path: false, crypto: false };
     return config;
   },
 };
