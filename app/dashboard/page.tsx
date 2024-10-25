@@ -36,12 +36,24 @@ export default function Dashboard() {
 
   async function handleUpload(files: File[]) {
     const file = files[0];
+  
+    if (!file || file.size === 0) {
+      console.error("No file selected or file is empty.");
+      showNotification({ title: 'Error', message: 'No file selected or file is empty.', color: 'red' });
+      return;
+    }
+  
+    console.log("Uploading file:", file);
+  
     const { data, error } = await supabase.storage.from('pdfs').upload(file.name, file);
+  
     if (error) {
-      showNotification({ title: 'Error', message: error.message, color: 'red' });
+      console.error("Upload error:", error); // Log el error
+      console.error("Error details:", JSON.stringify(error)); // Agregar más detalles del error
+      showNotification({ title: 'Error', message: error.message || 'Unknown error occurred.', color: 'red' });
     } else {
       showNotification({ title: 'Success', message: 'File uploaded successfully', color: 'green' });
-      fetchPdfFiles();
+      fetchPdfFiles(); // Refrescar la lista de archivos
     }
   }
 
