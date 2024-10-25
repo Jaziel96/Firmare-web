@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Container, Title, Button, Group, Text, Card } from '@mantine/core';
+import { Container, Title, Button, Group, Text, Card, Table } from '@mantine/core';
 import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { supabase } from '@/lib/supabase';
@@ -11,8 +11,16 @@ import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import * as pdfjsLib from 'pdfjs-dist';
 
+interface PdfFile {
+  name: string;
+  uploadedAt: string;
+  uploadedBy: string;
+  modifiedAt: string;
+  signatureStatus: 'Pendiente' | 'Firmado';
+}
+
 export default function Dashboard() {
-  const [pdfFiles, setPdfFiles] = useState<{ name: string }[]>([]);
+  const [pdfFiles, setPdfFiles] = useState<PdfFile[]>([]);
   const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +37,16 @@ export default function Dashboard() {
       setError(error.message);
       console.error(error);
     } else {
-      setPdfFiles(data);
+      const files = data.map((file) => ({
+        name: file.name,
+        uploadedAt: file.created_at,
+        uploadedBy: file.metadata.uploadedBy,
+        modifiedAt: file.metadata.modifiedAt || file.created_at,
+        signatureStatus: file.metadata.signatureStatus || 'Pendiente',
+      }));
+      // Ordenar los archivos por fecha de creación de mayor a menor
+      files.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+      setPdfFiles(files);
     }
     setLoading(false);
   }
@@ -45,7 +62,15 @@ export default function Dashboard() {
   
     console.log("Uploading file:", file);
   
-    const { data, error } = await supabase.storage.from('pdfs').upload(file.name, file);
+    const { data, error } = await supabase.storage.from('pdfs').upload(file.name, file, {
+      cacheControl: '3600',
+      upsert: false,
+      metadata: {
+        uploadedBy: 'user@example.com', // Reemplaza con el usuario actual
+        modifiedAt: new Date().toISOString(),
+        signatureStatus: 'Pendiente',
+      },
+    });
   
     if (error) {
       console.error("Upload error:", error); // Log el error
@@ -68,6 +93,24 @@ export default function Dashboard() {
     }
   }
 
+  async function handleSign(fileName: string) {
+    const { data, error } = await supabase.storage.from('pdfs').update(fileName, fileName, {
+      cacheControl: '3600',
+      upsert: true,
+      metadata: {
+        modifiedAt: new Date().toISOString(),
+        signatureStatus: 'Firmado',
+      },
+    });
+    if (error) {
+      console.error("Sign error:", error);
+      showNotification({ title: 'Error', message: error.message || 'Unknown error occurred.', color: 'red' });
+    } else {
+      showNotification({ title: 'Success', message: 'File signed successfully', color: 'green' });
+      fetchPdfFiles(); // Refrescar la lista de archivos
+    }
+  }
+
   async function handleLogout() {
     const { error } = await supabase.auth.signOut();
     if (error) console.error(error);
@@ -77,22 +120,41 @@ export default function Dashboard() {
     <Container>
       <Group align="apart" mb="md">
         <Title order={1}>Dashboard</Title>
-        <Button onClick={handleLogout}>Sign out</Button>
+        <Button onClick={handleLogout}>Cerrar Sesion</Button>
       </Group>
       <Dropzone onDrop={handleUpload} accept={[MIME_TYPES.pdf]}>
-        <Text style={{ textAlign: 'center' }}>Drag PDF files here or click to select files</Text>
+        <Text style={{ textAlign: 'center' }}>Arrastra el PDF o da click para selecionarlo</Text>
       </Dropzone>
-      <Group mt="md">
-        {pdfFiles.map((file) => (
-          <Card key={file.name} shadow="sm" padding="lg">
-            <Text>{file.name}</Text>
-            <Group>
-              <Button onClick={() => setSelectedPdf(file.name)}>View</Button>
-              <Button color="red" onClick={() => handleDelete(file.name)}>Delete</Button>
-            </Group>
-          </Card>
-        ))}
-      </Group>
+      <Table mt="md">
+        <thead>
+          <tr>
+            <th>Nombre de Archivo</th>
+            <th>Fecha de Creacion</th>
+            <th>Creado por</th>
+            <th>Fecha de Modificaicon</th>
+            <th>Estado de Firma</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pdfFiles.map((file) => (
+            <tr key={file.name}>
+              <td>{file.name}</td>
+              <td>{new Date(file.uploadedAt).toLocaleString()}</td>
+              <td>{file.uploadedBy}</td>
+              <td>{new Date(file.modifiedAt).toLocaleString()}</td>
+              <td>{file.signatureStatus}</td>
+              <td>
+                <Button onClick={() => setSelectedPdf(file.name)}>Ver</Button>
+                <Button color="red" onClick={() => handleDelete(file.name)}>Borrar</Button>
+                {file.signatureStatus === 'Pendiente' && (
+                  <Button color="green" onClick={() => handleSign(file.name)}>Firmar</Button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
       {loading && <Text>Loading...</Text>}
       {error && <Text color="red">{error}</Text>}
       {selectedPdf && (
