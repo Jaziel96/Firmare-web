@@ -57,6 +57,17 @@ export default function Dashboard() {
     }
   }
 
+  async function handleDelete(fileName: string) {
+    const { error } = await supabase.storage.from('pdfs').remove([fileName]);
+    if (error) {
+      console.error("Delete error:", error);
+      showNotification({ title: 'Error', message: error.message || 'Unknown error occurred.', color: 'red' });
+    } else {
+      showNotification({ title: 'Success', message: 'File deleted successfully', color: 'green' });
+      fetchPdfFiles(); // Refrescar la lista de archivos
+    }
+  }
+
   async function handleLogout() {
     const { error } = await supabase.auth.signOut();
     if (error) console.error(error);
@@ -75,7 +86,10 @@ export default function Dashboard() {
         {pdfFiles.map((file) => (
           <Card key={file.name} shadow="sm" padding="lg">
             <Text>{file.name}</Text>
-            <Button onClick={() => setSelectedPdf(file.name)}>View</Button>
+            <Group>
+              <Button onClick={() => setSelectedPdf(file.name)}>View</Button>
+              <Button color="red" onClick={() => handleDelete(file.name)}>Delete</Button>
+            </Group>
           </Card>
         ))}
       </Group>
