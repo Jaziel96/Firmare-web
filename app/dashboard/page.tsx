@@ -123,6 +123,11 @@ export default function Dashboard() {
     }
   }
 
+  function handleView(fileName: string) {
+    const fileUrl = supabase.storage.from('pdfs').getPublicUrl(fileName).data.publicUrl;
+    router.push(`/view-pdf?fileName=${fileName}&fileUrl=${encodeURIComponent(fileUrl)}`);
+  }
+
   return (
     <Container>
       <Group align="apart" mb="md">
@@ -152,11 +157,10 @@ export default function Dashboard() {
               <td>{new Date(file.modifiedAt).toLocaleString()}</td>
               <td>{file.signatureStatus}</td>
               <td>
-                <Button onClick={() => setSelectedPdf(file.name)}>Ver</Button>
-                <Button color="red" onClick={() => handleDelete(file.name)}>Borrar</Button>
-                {file.signatureStatus === 'Pendiente' && (
-                  <Button color="green" onClick={() => handleSign(file.name)}>Firmar</Button>
-                )}
+                <Button onClick={() => handleView(file.name)}>View</Button>
+                <Button color="red" onClick={() => handleDelete(file.name)}>Delete</Button>
+                
+                
               </td>
             </tr>
           ))}
@@ -164,18 +168,6 @@ export default function Dashboard() {
       </Table>
       {loading && <Text>Loading...</Text>}
       {error && <Text color="red">{error}</Text>}
-      {selectedPdf && (
-        <Card mt="md" shadow="sm" padding="lg">
-          <Title order={2}>Viewing: {selectedPdf}</Title>
-          <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
-            <Viewer
-              fileUrl={`${supabase.storage.from('pdfs').getPublicUrl(selectedPdf).data.publicUrl}`}
-              plugins={[defaultLayoutPluginInstance]}
-            />
-          </Worker>
-          <Button mt="md" onClick={() => setSelectedPdf(null)}>Close</Button>
-        </Card>
-      )}
     </Container>
   );
 }
