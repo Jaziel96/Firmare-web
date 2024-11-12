@@ -1,7 +1,10 @@
 "use client";
 
+import { Container } from '@mantine/core';
+import Navbar from '@/components/Navbar';
+import ImageSlider from '@/components/ImageSlider';
+import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
-import styles from './Home.module.css';
 
 export default function Home() {
   async function handleLogin() {
@@ -16,11 +19,12 @@ export default function Home() {
   }
 
   return (
-    <div className={styles.container}>
-      <main className={styles.main}>
-        <h1 className={styles.title}>Next Google Auth</h1>
-        <button onClick={handleLogin}>Sign in with Google</button>
-      </main>
-    </div>
+    <>
+      <Navbar />
+      <Container>
+        <ImageSlider />
+      </Container>
+      <Footer />
+    </>
   );
 }
