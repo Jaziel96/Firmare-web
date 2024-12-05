@@ -6,7 +6,7 @@ import { Container, Title, Button, Group, Card } from '@mantine/core';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
-import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import '@react-pdf-viewer/core/lib/styles/index.css';
 import * as pdfjsLib from 'pdfjs-dist';
 
 export default function ViewSignedPdf() {
@@ -19,7 +19,7 @@ export default function ViewSignedPdf() {
   useEffect(() => {
     const signedPdf = localStorage.getItem('signedPdf');
     if (signedPdf) {
-      setFileUrl(signedPdf);
+      setFileUrl(`data:application/pdf;base64,${signedPdf}`);
     } else {
       console.error('No signed PDF found in local storage');
     }
