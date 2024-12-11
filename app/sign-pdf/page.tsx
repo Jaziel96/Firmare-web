@@ -8,9 +8,11 @@ import '@react-pdf-viewer/core/lib/styles/index.css';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import * as pdfjsLib from 'pdfjs-dist';
-import plainAddPlaceholder from 'node-signpdf/dist/helpers/plainAddPlaceholder';
-import SignPdf from 'node-signpdf';
+import { PDFDocument, rgb } from 'pdf-lib';
 import forge from 'node-forge';
+import { v4 as uuidv4 } from 'uuid';
+import QRCode from 'qrcode';
+import crypto from 'crypto';
 
 export default function SignPdfComponent() {
   const router = useRouter();
@@ -68,31 +70,50 @@ export default function SignPdfComponent() {
     }
   };
 
-  // Conversión de .cer y .key a .p12
-  const convertToP12 = async (
-    cerBytes: ArrayBuffer,
-    keyBytes: ArrayBuffer,
-    password: string
-  ): Promise<Buffer> => {
-    try {
-      const cerPem = new TextDecoder().decode(new Uint8Array(cerBytes));
-      const keyPem = new TextDecoder().decode(new Uint8Array(keyBytes));
+  // Generar la cadena original
+  const generarCadenaOriginal = (datos: any) => {
+    return `
+      ${datos.institucion} | ${datos.nombre} | ${datos.grado} | ${datos.fecha}
+      ${datos.cadenaAdicional || ''}
+    `.trim();
+  };
 
-      const cert = forge.pki.certificateFromPem(cerPem);
-      const privateKey = forge.pki.decryptRsaPrivateKey(keyPem, password);
+  // Generar el hash de la cadena original
+  const generarHash = (cadenaOriginal: string) => {
+    const hash = crypto.createHash('sha256');
+    hash.update(cadenaOriginal, 'utf8');
+    return hash.digest('hex');
+  };
 
-      if (!privateKey) {
-        throw new Error('Invalid password or key format');
-      }
+  // Crear la firma electrónica avanzada
+  const firmarHash = (hash: string, clavePrivadaPem: string, password: string) => {
+    const privateKey = forge.pki.decryptRsaPrivateKey(clavePrivadaPem, password);
+    const firma = privateKey.sign(forge.md.sha256.create().update(hash, 'utf8'));
+    return forge.util.encode64(firma); // Convertir a Base64 para almacenamiento
+  };
 
-      const p12Asn1 = forge.pkcs12.toPkcs12Asn1(privateKey, [cert], password);
-      const p12Der = forge.asn1.toDer(p12Asn1).getBytes();
+  // Incrustar la firma en el PDF
+  const incrustarFirmaEnPdf = async (pdfBuffer: ArrayBuffer, cadenaOriginal: string, firma: string) => {
+    const pdfDoc = await PDFDocument.load(pdfBuffer);
+    const newPage = pdfDoc.addPage();
+    const { width, height } = newPage.getSize();
 
-      return Buffer.from(p12Der, 'binary');
-    } catch (error) {
-      console.error('Error al crear el archivo .p12:', error);
-      throw new Error('Failed to create .p12');
-    }
+    // Incrustar la cadena original y firma en el PDF
+    newPage.drawText(`Cadena Original: ${cadenaOriginal}`, {
+      x: 50,
+      y: height - 150,
+      size: 10,
+      maxWidth: width - 100, // Asegurarse de que el texto no se salga de los márgenes
+    });
+
+    newPage.drawText(`Firma Digital: ${firma}`, {
+      x: 50,
+      y: height - 170,
+      size: 10,
+      maxWidth: width - 100, // Asegurarse de que el texto no se salga de los márgenes
+    });
+
+    return await pdfDoc.save(); // Devuelve el PDF modificado como Buffer
   };
 
   // Firmar PDF
@@ -109,7 +130,13 @@ export default function SignPdfComponent() {
       const cerArrayBuffer = await cerFile.arrayBuffer();
       const keyArrayBuffer = await keyFile.arrayBuffer();
 
-      const p12Buffer = await convertToP12(cerArrayBuffer, keyArrayBuffer, password);
+      const keyPem = new TextDecoder().decode(keyArrayBuffer);
+      const privateKey = forge.pki.decryptRsaPrivateKey(keyPem, password);
+
+      if (!privateKey) {
+        console.error('Invalid password or key format');
+        return;
+      }
 
       if (!fileUrl) {
         console.error('File URL is missing');
@@ -117,20 +144,90 @@ export default function SignPdfComponent() {
       }
 
       const existingPdfBytes = await fetch(fileUrl).then((res) => res.arrayBuffer());
-      const pdfBuffer = Buffer.from(existingPdfBytes);
+      const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
-      const pdfWithPlaceholder = plainAddPlaceholder({
-        pdfBuffer,
-        reason: 'Firma digital',
-        signatureLength: 1612,
+      // Obtener información del certificado
+      const cerPem = new TextDecoder().decode(new Uint8Array(cerArrayBuffer));
+      const cert = forge.pki.certificateFromPem(cerPem);
+      const subject = cert.subject.attributes.find(attr => attr.name === 'commonName')?.value || 'Unknown';
+      const currentDate = new Date().toLocaleString();
+      const uuid = uuidv4();
+
+      // Datos para la cadena original
+      const datos = {
+        institucion: "Universidad de Colima, Colima",
+        nombre: subject,
+        grado: "Facultad de Telematica",
+        fecha: currentDate,
+      };
+
+      // Generar la cadena original
+      const cadenaOriginal = generarCadenaOriginal(datos);
+
+      // Generar el hash de la cadena original
+      const hash = generarHash(cadenaOriginal);
+
+      // Firmar el hash
+      const firma = firmarHash(hash, keyPem, password);
+
+      // Generar código QR
+      const qrCodeData = `Documento firmado por: ${subject}\nFecha: ${currentDate}\nUUID: ${uuid}`;
+      const qrCodeUrl = await QRCode.toDataURL(qrCodeData);
+
+      // Agregar una nueva página para la firma y la información adicional
+      const newPage = pdfDoc.addPage();
+      const { width, height } = newPage.getSize();
+
+      // Agregar el código QR al lado izquierdo arriba de la cadena original
+      const qrImageBytes = await fetch(qrCodeUrl).then(res => res.arrayBuffer());
+      const qrImage = await pdfDoc.embedPng(qrImageBytes);
+      newPage.drawImage(qrImage, {
+        x: 50,
+        y: height - 150,
+        width: 100,
+        height: 100,
       });
 
-      const pdfBytesWithText = Buffer.from(pdfWithPlaceholder);
-
-      const signedPdfBytes = SignPdf.sign(pdfBytesWithText, {
-        p12: p12Buffer,
-        passphrase: password,
+      // Dibujar textos "Firmado por", "Fecha", "UUID"
+      newPage.drawText(`Firmado por: ${subject}`, {
+        x: 50,
+        y: height - 260,
+        size: 10,
+        color: rgb(0, 0, 0),
+        maxWidth: width - 100, // Asegurarse de que el texto no se salga de los márgenes
       });
+      newPage.drawText(`Fecha: ${currentDate}`, {
+        x: 50,
+        y: height - 270,
+        size: 10,
+        color: rgb(0, 0, 0),
+        maxWidth: width - 100, // Asegurarse de que el texto no se salga de los márgenes
+      });
+      newPage.drawText(`UUID: ${uuid}`, {
+        x: 50,
+        y: height - 280,
+        size: 10,
+        color: rgb(0, 0, 0),
+        maxWidth: width - 100, // Asegurarse de que el texto no se salga de los márgenes
+      });
+
+      // Incrustar la cadena original y la firma en el PDF
+      newPage.drawText(`Cadena Original: ${cadenaOriginal}`, {
+        x: 50,
+        y: height - 300,
+        size: 10,
+        maxWidth: width - 100, // Asegurarse de que el texto no se salga de los márgenes
+      });
+
+      newPage.drawText(`Firma Digital: ${firma}`, {
+        x: 50,
+        y: height - 320,
+        size: 10,
+        maxWidth: width - 100, // Asegurarse de que el texto no se salga de los márgenes
+      });
+
+      // Guardar el PDF firmado
+      const signedPdfBytes = await pdfDoc.save();
 
       localStorage.setItem('signedPdf', Buffer.from(signedPdfBytes).toString('base64'));
       router.push(`/view-signed-pdf?fileName=${fileName}-signed`);
