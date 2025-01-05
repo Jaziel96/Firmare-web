@@ -1,12 +1,19 @@
-import { Mantine } from '@/lib/mantine';
-
+import { MantineProvider, MantineThemeOverride } from '@mantine/core';
 import { ReactNode } from 'react';
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+
+
+interface RootLayoutProps {
+  children: ReactNode;
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body>
-        <Mantine>{children}</Mantine>
+        <MantineProvider >
+          {children}
+        </MantineProvider>
       </body>
     </html>
   );
