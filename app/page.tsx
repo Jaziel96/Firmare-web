@@ -1,30 +1,24 @@
 "use client";
 
 import { Container } from '@mantine/core';
-import Navbar from '@/components/Navbar';
-import ImageSlider from '@/components/ImageSlider';
+import dynamic from 'next/dynamic';
 import Footer from '@/components/Footer';
-import { supabase } from '@/lib/supabase';
+// Importar estilos globales de Mantine
 
-export default function Home() {
-  async function handleLogin() {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: 'http://localhost:3000/dashboard',
-      },
-    });
 
-    if (error) console.error(error);
-  }
+const Navbar = dynamic(() => import('@/components/Navbar'), { ssr: false });
+const ImageSlider = dynamic(() => import('@/components/ImageSlider'), { ssr: false });
 
+const Page = () => {
   return (
     <>
       <Navbar />
-      <Container>
+      <Container m={0} p={0}>
         <ImageSlider />
       </Container>
       <Footer />
     </>
   );
 }
+
+export default Page;

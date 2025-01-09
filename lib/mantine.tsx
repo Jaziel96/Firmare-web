@@ -1,23 +1,14 @@
+"use client";
+
 import { MantineProvider, MantineThemeOverride } from '@mantine/core';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
 const theme: MantineThemeOverride = {
   colors: {
-    // Define your custom colors here
-    brand: [
-      '#f0f4ff',
-      '#d9e2ff',
-      '#b3c7ff',
-      '#8daaff',
-      '#668dff',
-      '#3f70ff',
-      '#1953ff',
-      '#0036e6',
-      '#0029b3',
-      '#001c80',
-    ],
+    myColor: ['#f0fce8', '#e4f6d7', '#b3c7ff', '#8daaff', '#668dff', '#3f70ff', '#1953ff', '#0036e6', '#0029b3', '#001c80'],
   },
-  primaryColor: 'brand',
+  primaryColor: 'myColor',
+  fontFamily: 'Arial, sans-serif',
 };
 
 interface MantineProps {
@@ -25,8 +16,19 @@ interface MantineProps {
 }
 
 export function Mantine({ children }: MantineProps) {
+  const [colorScheme, setColorScheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    const matchDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const updateColorScheme = () => setColorScheme(matchDark.matches ? 'dark' : 'light');
+
+    updateColorScheme();
+    matchDark.addEventListener('change', updateColorScheme);
+    return () => matchDark.removeEventListener('change', updateColorScheme);
+  }, []);
+
   return (
-    <MantineProvider theme={theme}>
+    <MantineProvider theme={{ ...theme, colorScheme }}>
       {children}
     </MantineProvider>
   );
