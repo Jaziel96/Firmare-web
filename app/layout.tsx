@@ -1,4 +1,5 @@
 import { Mantine } from '@/lib/mantine';
+import '../styles/fonts.css';
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -7,7 +8,7 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body>
+      <body style={{ margin: 0, fontFamily: 'FuturaBT, Arial, sans-serif' }}>
         <Mantine>{children}</Mantine>
       </body>
     </html>

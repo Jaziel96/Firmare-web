@@ -1,4 +1,4 @@
-import { Container, Group, Button, Text } from '@mantine/core';
+import { Box, Group, Button, Text } from '@mantine/core';
 import { supabase } from '@/lib/supabase';
 
 export default function Navbar() {
@@ -14,26 +14,34 @@ export default function Navbar() {
   }
 
   return (
-    <Container>
-      <Group>
+    <Box
+      style={{
+        backgroundColor: '#f0fce8', // Primer color de myColor
+        padding: '1rem',
+        width: '100%', // Abarcar el ancho total de la página
+        boxSizing: 'border-box', // Incluir el padding en el ancho total
+        overflow: 'hidden', // Evitar desbordamiento
+      }}
+    >
+      <Group position="apart" style={{ width: '100%' }}>
         <Text size="xl" fw={700}>
-          Mi Aplicación
+          Firmare
         </Text>
         <Group>
-          <Button variant="outline" component="a" href="/">
+          <Button variant="filled" style={{ backgroundColor: '#e4f6d7', color: '#000000' }} component="a" href="/">
             Inicio
           </Button>
-          <Button onClick={handleLogin} variant="outline">
-            Iniciar sesión con Google
-          </Button>
-          <Button variant="outline" component="a" href="/guides">
+          <Button variant="filled" style={{ backgroundColor: '#e4f6d7', color: '#000000' }} component="a" href="/guides">
             Guías
           </Button>
-          <Button variant="outline" component="a" href="/legal">
+          <Button variant="filled" style={{ backgroundColor: '#e4f6d7', color: '#000000' }} component="a" href="/legal">
             Legales
+          </Button>
+          <Button onClick={handleLogin} variant="filled" style={{ backgroundColor: '#e4f6d7', color: '#000000' }}>
+            Iniciar sesión con Google
           </Button>
         </Group>
       </Group>
-    </Container>
+    </Box>
   );
 }
