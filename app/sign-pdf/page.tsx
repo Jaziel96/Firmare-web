@@ -242,32 +242,56 @@ export default function SignPdfComponent() {
     <Container>
       <Group align="apart" mb="md">
         <Title order={1}>Signing: {fileName}</Title>
-        <Button onClick={() => router.push('/dashboard')}>Back to Dashboard</Button>
+        <Button style={{ backgroundColor: 'gray' }} onClick={() => router.push('/dashboard')}>Regresar a Inicio</Button>
       </Group>
-      <Card mt="md" shadow="sm" padding="lg">
+      <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: '#e4f6d7' }}> {/* Segundo color de myColor */}
         <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
           <div style={{ height: '400px' }}>
             <Viewer fileUrl={fileUrl || ''} plugins={[defaultLayoutPluginInstance]} />
           </div>
         </Worker>
       </Card>
-      <Card mt="md" shadow="sm" padding="lg">
-        <FileInput label="Upload .cer file" placeholder="Choose a .cer file" accept=".cer" value={cerFile} onChange={setCerFile} />
-        <FileInput label="Upload .key file" placeholder="Choose a .key file" accept=".key" value={keyFile} onChange={setKeyFile} />
+      <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: '#e4f6d7' }}> {/* Segundo color de myColor */}
+        <FileInput
+          label="Upload .cer file"
+          placeholder="Choose a .cer file"
+          accept=".cer"
+          value={cerFile}
+          onChange={setCerFile}
+          styles={{
+            input: { backgroundColor: '#f1f3f5', color: '#000' },
+            label: { color: '#000' },
+          }}
+        />
+        <FileInput
+          label="Upload .key file"
+          placeholder="Choose a .key file"
+          accept=".key"
+          value={keyFile}
+          onChange={setKeyFile}
+          styles={{
+            input: { backgroundColor: '#f1f3f5', color: '#000' },
+            label: { color: '#000' },
+          }}
+        />
         <TextInput
           label="Password"
           placeholder="Enter password"
           type="password"
           value={password}
           onChange={(event) => setPassword(event.currentTarget.value)}
+          styles={{
+            input: { backgroundColor: '#f1f3f5', color: '#000' },
+            label: { color: '#000' },
+          }}
         />
-        <Button mt="md" onClick={handleVerifyPassword}>
-          Verify Password
+        <Button mt="md" style={{ backgroundColor: 'blue', color: 'white' }} onClick={handleVerifyPassword}>
+          Verificar Contraseña
         </Button>
         {verificationStatus && <Notification color="green">{verificationStatus}</Notification>}
         {errorMessage && <Notification color="red">{errorMessage}</Notification>}
-        <Button mt="md" onClick={handleSign} disabled={!isPasswordValid}>
-          Sign
+        <Button mt="md" style={{ backgroundColor: 'green', color: 'white' }} onClick={handleSign} disabled={!isPasswordValid}>
+          Firmar
         </Button>
       </Card>
     </Container>

@@ -1,8 +1,22 @@
 import { Box, Group, Button, Text } from '@mantine/core';
+import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export default function Navbar() {
-  async function handleLogin() {
+  useEffect(() => {
+    /* global google */
+    google.accounts.id.initialize({
+      client_id: '1012870521703-bg5soonu6mtncbvhinvnih1e17nrkrf6.apps.googleusercontent.com',
+      callback: handleLogin,
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('google-signin-button'),
+      { theme: 'outline', size: 'large' } // Personaliza el botón aquí
+    );
+  }, []);
+
+  async function handleLogin(response: any) {
+    const { credential } = response;
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -37,9 +51,7 @@ export default function Navbar() {
           <Button variant="filled" style={{ backgroundColor: '#e4f6d7', color: '#000000' }} component="a" href="/legal">
             Legales
           </Button>
-          <Button onClick={handleLogin} variant="filled" style={{ backgroundColor: '#e4f6d7', color: '#000000' }}>
-            Iniciar sesión con Google
-          </Button>
+          <div id="google-signin-button"></div> {/* Botón oficial de Google Sign-In */}
         </Group>
       </Group>
     </Box>

@@ -10,6 +10,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="en">
       <body style={{ margin: 0, fontFamily: 'FuturaBT, Arial, sans-serif' }}>
         <Mantine>{children}</Mantine>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
       </body>
     </html>
   );

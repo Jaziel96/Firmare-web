@@ -2,15 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Container, Title, Button, Group, Text, Card, Table } from '@mantine/core';
+import { Container, Title, Button, Group, Text, Table } from '@mantine/core';
 import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { supabase } from '@/lib/supabase';
-import { Worker, Viewer } from '@react-pdf-viewer/core';
-import '@react-pdf-viewer/core/lib/styles/index.css';
-import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
-import '@react-pdf-viewer/default-layout/lib/styles/index.css';
-import * as pdfjsLib from 'pdfjs-dist';
 
 interface PdfFile {
   name: string;
@@ -22,10 +17,8 @@ interface PdfFile {
 
 export default function Dashboard() {
   const [pdfFiles, setPdfFiles] = useState<PdfFile[]>([]);
-  const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const defaultLayoutPluginInstance = defaultLayoutPlugin();
   const router = useRouter();
 
   useEffect(() => {
@@ -130,37 +123,56 @@ export default function Dashboard() {
 
   return (
     <Container>
-      <Group align="apart" mb="md">
-        <Title order={1}>Dashboard</Title>
-        <Button onClick={handleLogout}>Sign out</Button>
+      <Group position="apart" mb="md">
+        <Title order={1}>Firmare</Title>
+        <Button color="red" onClick={handleLogout}>Cerrar Sesión</Button>
       </Group>
-      <Dropzone onDrop={handleUpload} accept={[MIME_TYPES.pdf]}>
-        <Text style={{ textAlign: 'center' }}>Drag PDF files here or click to select files</Text>
+      <Dropzone
+        onDrop={handleUpload}
+        accept={[MIME_TYPES.pdf]}
+        styles={(theme) => ({
+          root: {
+            backgroundColor: '#e4f6d7', // Segundo color de myColor
+            border: `2px dashed ${theme.colors.blue[6]}`,
+            padding: theme.spacing.xl,
+            textAlign: 'center',
+            color: '#000', // Color de las letras en negro
+            '&:hover': {
+              backgroundColor: '#f1f3f5', // Color de fondo al pasar el mouse
+            },
+          },
+        })}
+      >
+        <Text style={{ textAlign: 'center', color: '#000' }}>Arrastra el PDF aqui o has click aqui para seleccionar el PDF</Text>
       </Dropzone>
-      <Table mt="md">
-        <thead>
+      <Table mt="md" highlightOnHover withBorder withColumnBorders>
+        <thead style={{ backgroundColor: '#e4f6d7', color: '#000' }}>
           <tr>
-            <th>File Name</th>
-            <th>Uploaded At</th>
-            <th>Uploaded By</th>
-            <th>Modified At</th>
-            <th>Signature Status</th>
-            <th>Actions</th>
+            <th style={{ borderColor: '#000', color: '#000' }}>Nombre</th>
+            <th style={{ borderColor: '#000', color: '#000' }}>Fecha de Creacion</th>
+            <th style={{ borderColor: '#000', color: '#000' }}>Creado por</th>
+            <th style={{ borderColor: '#000', color: '#000' }}>Fecha de Modificaicon</th>
+            <th style={{ borderColor: '#000', color: '#000' }}>Estado de Firma</th>
+            <th style={{ borderColor: '#000', color: '#000' }}>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {pdfFiles.map((file) => (
-            <tr key={file.name}>
-              <td>{file.name}</td>
-              <td>{new Date(file.uploadedAt).toLocaleString()}</td>
-              <td>{file.uploadedBy}</td>
-              <td>{new Date(file.modifiedAt).toLocaleString()}</td>
-              <td>{file.signatureStatus}</td>
-              <td>
+            <tr
+              key={file.name}
+              style={{ borderColor: '#000', color: '#000' }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e4f6d7', e.currentTarget.style.color = '#000')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '', e.currentTarget.style.color = '#000')}
+            >
+              <td style={{ borderColor: '#000', color: '#000' }}>{file.name}</td>
+              <td style={{ borderColor: '#000', color: '#000' }}>{new Date(file.uploadedAt).toLocaleString()}</td>
+              <td style={{ borderColor: '#000', color: '#000' }}>{file.uploadedBy}</td>
+              <td style={{ borderColor: '#000', color: '#000' }}>{new Date(file.modifiedAt).toLocaleString()}</td>
+              <td style={{ borderColor: '#000', color: '#000' }}>{file.signatureStatus}</td>
+              <td style={{ borderColor: '#000', color: '#000' }}>
                 <Button onClick={() => handleView(file.name)}>View</Button>
                 <Button color="red" onClick={() => handleDelete(file.name)}>Delete</Button>
-                
-                
+                <Button color="green" onClick={() => handleSign(file.name)}>Sign</Button>
               </td>
             </tr>
           ))}
