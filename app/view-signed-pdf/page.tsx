@@ -21,17 +21,17 @@ export default function ViewSignedPdf() {
     if (signedPdf) {
       setFileUrl(`data:application/pdf;base64,${signedPdf}`);
     } else {
-      console.error('No signed PDF found in local storage');
+      console.error('No se ha encontrado ningún PDF firmado en el almacenamiento local');
     }
   }, []);
 
   return (
     <Container>
       <Group align="apart" mb="md">
-        <Title order={1}>Viewing Signed: {fileName}</Title>
-        <Button onClick={() => router.push('/dashboard')}>Back to Dashboard</Button>
+        <Title order={1}>Nombre: {fileName}</Title>
       </Group>
-      <Card mt="md" shadow="sm" padding="lg">
+      <Button style={{ backgroundColor: 'gray' }} onClick={() => router.push('/dashboard')}>Regresar a Inicio</Button>
+      <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: '#e4f6d7' }}>
         <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
           <div style={{ height: '800px' }}>
             {fileUrl ? (
@@ -40,7 +40,7 @@ export default function ViewSignedPdf() {
                 plugins={[defaultLayoutPluginInstance]}
               />
             ) : (
-              <p>Loading signed PDF...</p>
+              <p>Cargando PDF firmado...</p>
             )}
           </div>
         </Worker>

@@ -7,7 +7,7 @@ export default function Navbar() {
     /* global google */
     google.accounts.id.initialize({
       client_id: '1012870521703-bg5soonu6mtncbvhinvnih1e17nrkrf6.apps.googleusercontent.com',
-      callback: handleLogin,
+      callback: handleGoogleCallback, // Manejar el token de Google aquí
     });
     google.accounts.id.renderButton(
       document.getElementById('google-signin-button'),
@@ -15,16 +15,25 @@ export default function Navbar() {
     );
   }, []);
 
-  async function handleLogin(response: any) {
+  async function handleGoogleCallback(response: any) {
     const { credential } = response;
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: 'http://localhost:3000/dashboard',
-      },
-    });
 
-    if (error) console.error(error);
+    try {
+      // Utiliza el token de Google directamente con Supabase
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: credential,
+      });
+
+      if (error) {
+        console.error('Error al iniciar sesión con Google:', error);
+      } else {
+        console.log('Inicio de sesión exitoso:', data);
+        window.location.href = '/dashboard'; // Redirige al dashboard
+      }
+    } catch (err) {
+      console.error('Error inesperado al autenticar:', err);
+    }
   }
 
   return (
@@ -57,3 +66,4 @@ export default function Navbar() {
     </Box>
   );
 }
+

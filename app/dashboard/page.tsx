@@ -170,15 +170,15 @@ export default function Dashboard() {
               <td style={{ borderColor: '#000', color: '#000' }}>{new Date(file.modifiedAt).toLocaleString()}</td>
               <td style={{ borderColor: '#000', color: '#000' }}>{file.signatureStatus}</td>
               <td style={{ borderColor: '#000', color: '#000' }}>
-                <Button onClick={() => handleView(file.name)}>View</Button>
-                <Button color="red" onClick={() => handleDelete(file.name)}>Delete</Button>
-                <Button color="green" onClick={() => handleSign(file.name)}>Sign</Button>
+                <Button onClick={() => handleView(file.name)}>Ver</Button>
+                <Button color="red" onClick={() => handleDelete(file.name)}>Borrar</Button>
+                <Button color="green" onClick={() => handleSign(file.name)}>Firmar</Button>
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
-      {loading && <Text>Loading...</Text>}
+      {loading && <Text>Cargando...</Text>}
       {error && <Text color="red">{error}</Text>}
     </Container>
   );

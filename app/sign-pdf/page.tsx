@@ -37,7 +37,7 @@ export default function SignPdfComponent() {
       return true;
     } catch (error) {
       console.error('El archivo .cer no es válido:', error);
-      setErrorMessage('Invalid .cer file. Please ensure it is in PEM format.');
+      setErrorMessage('Archivo .cer no válido. Asegúrese de que está en formato PEM.');
       return false;
     }
   };
@@ -45,7 +45,7 @@ export default function SignPdfComponent() {
   // Verificar contraseña
   const handleVerifyPassword = async () => {
     if (!keyFile || !password) {
-      setErrorMessage('Missing key or password');
+      setErrorMessage('Falta la clave o la contraseña');
       return;
     }
 
@@ -56,17 +56,17 @@ export default function SignPdfComponent() {
       const privateKey = forge.pki.decryptRsaPrivateKey(keyPem, password);
       if (privateKey) {
         setIsPasswordValid(true);
-        setVerificationStatus('Password is valid');
+        setVerificationStatus('Contraseña válida');
         setErrorMessage('');
       } else {
         setIsPasswordValid(false);
         setVerificationStatus('');
-        setErrorMessage('Invalid password');
+        setErrorMessage('Contraseña invalida');
       }
     } catch (error) {
       setIsPasswordValid(false);
       setVerificationStatus('');
-      setErrorMessage('Invalid password or error reading the key');
+      setErrorMessage('Contraseña no válida o error de lectura de la clave');
     }
   };
 
@@ -119,7 +119,7 @@ export default function SignPdfComponent() {
   // Firmar PDF
   const handleSign = async () => {
     if (!cerFile || !keyFile || !password) {
-      console.error('Missing certificate, key, or password');
+      console.error('Falta el certificado, la clave o la contraseña');
       return;
     }
 
@@ -134,12 +134,12 @@ export default function SignPdfComponent() {
       const privateKey = forge.pki.decryptRsaPrivateKey(keyPem, password);
 
       if (!privateKey) {
-        console.error('Invalid password or key format');
+        console.error('Contraseña o formato de clave no válidos');
         return;
       }
 
       if (!fileUrl) {
-        console.error('File URL is missing');
+        console.error('Falta la URL del archivo');
         return;
       }
 
@@ -242,8 +242,8 @@ export default function SignPdfComponent() {
     <Container>
       <Group align="apart" mb="md">
         <Title order={1}>Signing: {fileName}</Title>
-        <Button style={{ backgroundColor: 'gray' }} onClick={() => router.push('/dashboard')}>Regresar a Inicio</Button>
       </Group>
+      <Button style={{ backgroundColor: 'gray' }} onClick={() => router.push('/dashboard')}>Regresar a Inicio</Button>
       <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: '#e4f6d7' }}> {/* Segundo color de myColor */}
         <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
           <div style={{ height: '400px' }}>
@@ -253,8 +253,7 @@ export default function SignPdfComponent() {
       </Card>
       <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: '#e4f6d7' }}> {/* Segundo color de myColor */}
         <FileInput
-          label="Upload .cer file"
-          placeholder="Choose a .cer file"
+          label="Subir archivo .cer"
           accept=".cer"
           value={cerFile}
           onChange={setCerFile}
@@ -264,9 +263,7 @@ export default function SignPdfComponent() {
           }}
         />
         <FileInput
-          label="Upload .key file"
-          placeholder="Choose a .key file"
-          accept=".key"
+          label="Subir archivo .key"
           value={keyFile}
           onChange={setKeyFile}
           styles={{
@@ -275,8 +272,8 @@ export default function SignPdfComponent() {
           }}
         />
         <TextInput
-          label="Password"
-          placeholder="Enter password"
+          label="Contraseña"
+          placeholder="Introdusca la contraseña"
           type="password"
           value={password}
           onChange={(event) => setPassword(event.currentTarget.value)}
