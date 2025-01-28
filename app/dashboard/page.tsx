@@ -15,6 +15,17 @@ interface PdfFile {
   signatureStatus: 'Pendiente' | 'Firmado';
 }
 
+function normalizeFileName(fileName: string): string {
+  const uniqueId = Date.now(); // Agregar un identificador único
+  return fileName
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .toLowerCase()
+    .replace(/\.[^/.]+$/, '') // Eliminar la extensión
+    .concat(`_${uniqueId}.pdf`); // Agregar el identificador único y la extensión
+}
+
 export default function Dashboard() {
   const [pdfFiles, setPdfFiles] = useState<PdfFile[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,7 +38,18 @@ export default function Dashboard() {
 
   async function fetchPdfFiles() {
     setLoading(true);
+    setError(null);
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      setError("User not authenticated.");
+      setLoading(false);
+      return;
+    }
+
     const { data, error } = await supabase.storage.from('pdfs').list();
+
     if (error) {
       setError(error.message);
       console.error(error);
@@ -35,14 +57,15 @@ export default function Dashboard() {
       const files = data.map((file) => ({
         name: file.name,
         uploadedAt: file.created_at,
-        uploadedBy: file.metadata.uploadedBy,
-        modifiedAt: file.metadata.modifiedAt || file.created_at,
-        signatureStatus: file.metadata.signatureStatus || 'Pendiente',
+        uploadedBy: file.metadata?.uploadedBy || 'unknown',
+        modifiedAt: file.metadata?.modifiedAt || file.created_at,
+        signatureStatus: file.metadata?.signatureStatus || 'Pendiente',
       }));
-      // Ordenar los archivos por fecha de creación de mayor a menor
+
       files.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
       setPdfFiles(files);
     }
+
     setLoading(false);
   }
 
@@ -54,22 +77,33 @@ export default function Dashboard() {
       showNotification({ title: 'Error', message: 'No file selected or file is empty.', color: 'red' });
       return;
     }
+    
+    // Normalizar el nombre del archivo
+    const normalizedFileName = normalizeFileName(file.name);
+
+    // Obtener el usuario autenticado
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
   
-    console.log("Uploading file:", file);
+    if (authError || !user) {
+      console.error("Auth error:", authError);
+      showNotification({ title: 'Error', message: 'User not authenticated.', color: 'red' });
+      return;
+    }
   
-    const { data, error } = await supabase.storage.from('pdfs').upload(file.name, file, {
+    // Subir el archivo con el nombre normalizado
+    const { data, error } = await supabase.storage.from('pdfs').upload(normalizedFileName, file, {
       cacheControl: '3600',
       upsert: false,
       metadata: {
-        uploadedBy: 'user@example.com', // Reemplaza con el usuario actual
+        uploadedBy: user.email || 'unknown',
         modifiedAt: new Date().toISOString(),
         signatureStatus: 'Pendiente',
+        owner: user.id,
       },
     });
   
     if (error) {
-      console.error("Upload error:", error); // Log el error
-      console.error("Error details:", JSON.stringify(error)); // Agregar más detalles del error
+      console.error("Upload error details:", JSON.stringify(error, null, 2)); // Registrar el error completo
       showNotification({ title: 'Error', message: error.message || 'Unknown error occurred.', color: 'red' });
     } else {
       showNotification({ title: 'Success', message: 'File uploaded successfully', color: 'green' });
@@ -79,12 +113,13 @@ export default function Dashboard() {
 
   async function handleDelete(fileName: string) {
     const { error } = await supabase.storage.from('pdfs').remove([fileName]);
+
     if (error) {
       console.error("Delete error:", error);
       showNotification({ title: 'Error', message: error.message || 'Unknown error occurred.', color: 'red' });
     } else {
       showNotification({ title: 'Success', message: 'File deleted successfully', color: 'green' });
-      fetchPdfFiles(); // Refrescar la lista de archivos
+      fetchPdfFiles();
     }
   }
 
@@ -97,12 +132,13 @@ export default function Dashboard() {
         signatureStatus: 'Firmado',
       },
     });
+
     if (error) {
       console.error("Sign error:", error);
       showNotification({ title: 'Error', message: error.message || 'Unknown error occurred.', color: 'red' });
     } else {
       showNotification({ title: 'Success', message: 'File signed successfully', color: 'green' });
-      fetchPdfFiles(); // Refrescar la lista de archivos
+      fetchPdfFiles();
     }
   }
 
@@ -111,7 +147,6 @@ export default function Dashboard() {
     if (error) {
       console.error(error);
     } else {
-      // Redirigir a la página de inicio después de cerrar la sesión
       router.push('/');
     }
   }
@@ -132,13 +167,13 @@ export default function Dashboard() {
         accept={[MIME_TYPES.pdf]}
         styles={(theme) => ({
           root: {
-            backgroundColor: '#e4f6d7', // Segundo color de myColor
+            backgroundColor: '#e4f6d7',
             border: `2px dashed ${theme.colors.blue[6]}`,
             padding: theme.spacing.xl,
             textAlign: 'center',
-            color: '#000', // Color de las letras en negro
+            color: '#000',
             '&:hover': {
-              backgroundColor: '#f1f3f5', // Color de fondo al pasar el mouse
+              backgroundColor: '#f1f3f5',
             },
           },
         })}

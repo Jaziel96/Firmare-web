@@ -1,17 +1,22 @@
 import { Box, Group, Button, Text } from '@mantine/core';
 import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
+  const router = useRouter();
+  const clientId = '1012870521703-bg5soonu6mtncbvhinvnih1e17nrkrf6.apps.googleusercontent.com'; // Replace with your actual Google client ID
+
   useEffect(() => {
     /* global google */
     google.accounts.id.initialize({
-      client_id: '1012870521703-bg5soonu6mtncbvhinvnih1e17nrkrf6.apps.googleusercontent.com',
+      client_id: clientId, // Usa el valor predeterminado si es undefined
       callback: handleGoogleCallback, // Manejar el token de Google aquí
     });
+
     google.accounts.id.renderButton(
       document.getElementById('google-signin-button'),
-      { theme: 'outline', size: 'large' } // Personaliza el botón aquí
+      { theme: 'outline', size: 'large' }
     );
   }, []);
 
@@ -19,17 +24,16 @@ export default function Navbar() {
     const { credential } = response;
 
     try {
-      // Utiliza el token de Google directamente con Supabase
       const { data, error } = await supabase.auth.signInWithIdToken({
         provider: 'google',
         token: credential,
       });
 
       if (error) {
-        console.error('Error al iniciar sesión con Google:', error);
+        console.error('Error al iniciar sesión con Google:', error.message);
       } else {
         console.log('Inicio de sesión exitoso:', data);
-        window.location.href = '/dashboard'; // Redirige al dashboard
+        router.push('/dashboard'); // Redirige al dashboard
       }
     } catch (err) {
       console.error('Error inesperado al autenticar:', err);
@@ -66,4 +70,3 @@ export default function Navbar() {
     </Box>
   );
 }
-
