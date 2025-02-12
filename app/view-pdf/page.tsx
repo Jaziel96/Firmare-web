@@ -26,11 +26,17 @@ export default function ViewPdf() {
 
   return (
     <Container>
-      <Group align="apart" mb="md">
-        <Title order={1}>Viewing: {fileName}</Title>
-        <Button onClick={() => router.push('/dashboard')}>Back to Dashboard</Button>
+      <Group position="apart" mb="md">
+        <Title order={1}>Nombre: {fileName}</Title>
+        
       </Group>
-      <Card mt="md" shadow="sm" padding="lg">
+      <Button
+          style={{ backgroundColor: 'gray' }} // Cuarto color de myColor
+          onClick={() => router.push('/dashboard')}
+        >
+          Regresar
+        </Button>
+      <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: '#e4f6d7' }}> {/* Segundo color de myColor */}
         <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
           <Viewer
             fileUrl={fileUrl || ''}
@@ -38,7 +44,7 @@ export default function ViewPdf() {
           />
         </Worker>
       </Card>
-      <Button mt="md" onClick={handleSign}>Sign</Button>
+      <Button color="green" mt="md" onClick={handleSign}>Firmar</Button>
     </Container>
   );
 }
