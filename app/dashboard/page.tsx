@@ -1,17 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Container,
-  Title,
-  Button,
-  Group,
-  Text,
-  Table,
-} from "@mantine/core";
+import { Container, Title, Button, Group, Text, Table } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import { showNotification } from "@mantine/notifications";
 import { supabase } from "@/lib/supabase";
+import { useSearchParams } from 'next/navigation';
 
 interface PdfFile {
   name: string;
@@ -19,6 +13,7 @@ interface PdfFile {
   uploadedby: string;
   modifiedat: string;
   signaturestatus: "Pendiente" | "Firmado";
+  public_url?: string; 
 }
 
 function normalizeFileName(fileName: string): string {
@@ -37,6 +32,21 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams(); // Obtener los parámetros de la URL
+
+  // Verificar si el proceso de firma se completó correctamente
+  useEffect(() => {
+    const firmaStatus = searchParams.get('firma');
+    if (firmaStatus === 'success') {
+      showNotification({
+        title: 'Éxito',
+        message: 'El PDF se firmó correctamente',
+        color: 'green',
+      });
+      // Limpiar el parámetro de la URL usando router.push con shallow
+      router.push('/dashboard');
+    }
+  }, [searchParams, router]);
 
   // Función auxiliar para verificar si el usuario está autenticado
   async function ensureAuthenticated(): Promise<boolean> {
@@ -83,6 +93,29 @@ export default function Dashboard() {
       console.error("Error fetching files:", err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Función para generar un enlace público
+  async function handleGeneratePublicLink(fileName: string) {
+    try {
+      const { data, error } = await supabase.storage
+        .from('pdfs')
+        .createSignedUrl(fileName, 3600); // URL válida por 1 hora
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Redirigir a la vista pública con el nombre del archivo
+      router.push(`/view-signed?fileName=${fileName}`);
+    } catch (err: any) {
+      console.error("Error generating public link:", err);
+      showNotification({
+        title: "Error",
+        message: "No se pudo generar el enlace público.",
+        color: "red",
+      });
     }
   }
 
@@ -325,6 +358,14 @@ export default function Dashboard() {
                 <Button color="green" onClick={() => handleSign(file.name)}>
                   Firmar
                 </Button>
+                {file.signaturestatus === 'Firmado' && file.public_url && (
+                <Button
+                  color="blue"
+                  onClick={() => file.public_url && router.push(file.public_url)}
+                >
+                  Link Público
+                </Button>
+                )}
               </td>
             </tr>
           ))}
