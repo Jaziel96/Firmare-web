@@ -33,6 +33,20 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams(); // Obtener los parámetros de la URL
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Estado para verificar autenticación
+
+  // Verificar si el usuario está autenticado al cargar la página
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/'); // Redirigir al inicio si no está autenticado
+      } else {
+        setIsAuthenticated(true); // Permitir acceso si está autenticado
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   // Verificar si el proceso de firma se completó correctamente
   useEffect(() => {
@@ -65,8 +79,10 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    fetchPdfFiles();
-  }, []);
+    if (isAuthenticated) {
+      fetchPdfFiles();
+    }
+  }, [isAuthenticated]);
 
   async function fetchPdfFiles() {
     if (!(await ensureAuthenticated())) return;
@@ -138,7 +154,7 @@ export default function Dashboard() {
 
     try {
       // Subir el archivo con el nombre normalizado
-      const { data: uploadData, error: uploadError } =
+      const { error: uploadError } =
         await supabase.storage.from("pdfs").upload(normalizedFileName, file, {
           cacheControl: "3600",
           upsert: false,
@@ -276,9 +292,22 @@ export default function Dashboard() {
     }
   }
 
+  // Mostrar carga mientras se verifica la autenticación
+  if (!isAuthenticated) {
+    return <Text>Cargando...</Text>;
+  }
+
   return (
     <Container>
       <Group position="apart" mb="md">
+        <img
+              src="/images/UdeC_2L izq Negro.png" // Ruta relativa desde la carpeta public
+              alt="Logo UdeC"
+              style={{
+                height: '40px', // Altura del logo
+                width: 'auto', // Mantener proporción
+              }}
+            />
         <Title order={1}>Firmare</Title>
         <Button color="red" onClick={handleLogout}>
           Cerrar Sesión
@@ -354,9 +383,6 @@ export default function Dashboard() {
                 <Button onClick={() => handleView(file.name)}>Ver</Button>
                 <Button color="red" onClick={() => handleDelete(file.name)}>
                   Borrar
-                </Button>
-                <Button color="green" onClick={() => handleSign(file.name)}>
-                  Firmar
                 </Button>
                 {file.signaturestatus === 'Firmado' && file.public_url && (
                 <Button

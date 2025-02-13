@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Agregamos useEffect
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Container, Title, Button, Group, Card, TextInput, FileInput, Notification } from '@mantine/core';
+import { Container, Title, Button, Group, Card, TextInput, FileInput, Notification, Text } from '@mantine/core'; // Agregamos Text
 import { showNotification } from '@mantine/notifications';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import '@react-pdf-viewer/core/lib/styles/index.css';
@@ -29,7 +29,25 @@ export default function SignPdfComponent() {
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(true); // Estado para manejar la carga
 
+  // Verificar si el usuario está autenticado
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/'); // Redirigir al inicio si no está autenticado
+      } else {
+        setLoading(false); // Permitir acceso si está autenticado
+      }
+    };
+    checkAuth();
+  }, [router]);
+
+  // Mostrar carga mientras se verifica la autenticación
+  if (loading) {
+    return <Text>Cargando...</Text>;
+  }
   // Validar archivo .cer como PEM
   const validateCerFile = async (cerFile: File): Promise<boolean> => {
     try {
