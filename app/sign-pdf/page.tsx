@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'; // Agregamos useEffect
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Container, Title, Button, Group, Card, TextInput, FileInput, Notification, Text } from '@mantine/core'; // Agregamos Text
+import { Container, Title, Button, Group, Card, TextInput, FileInput, Notification, Text, useMantineTheme } from '@mantine/core'; // Agregamos Text
 import { showNotification } from '@mantine/notifications';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import '@react-pdf-viewer/core/lib/styles/index.css';
@@ -15,8 +15,10 @@ import { v4 as uuidv4 } from 'uuid';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
 import { supabase } from "@/lib/supabase";
+import Footer from '@/components/Footer';
 
 export default function SignPdfComponent() {
+  const theme = useMantineTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
   const fileName = searchParams.get('fileName');
@@ -340,59 +342,106 @@ export default function SignPdfComponent() {
     });
   }
 };
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
+
   return (
-    <Container>
-      <Group align="apart" mb="md">
-        <Title order={1}>Signing: {fileName}</Title>
-      </Group>
-      <Button style={{ backgroundColor: 'gray' }} onClick={() => router.push('/dashboard')}>Regresar a Inicio</Button>
-      <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: '#e4f6d7' }}> {/* Segundo color de myColor */}
-        <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
-          <div style={{ height: '400px' }}>
-            <Viewer fileUrl={fileUrl || ''} plugins={[defaultLayoutPluginInstance]} />
-          </div>
-        </Worker>
-      </Card>
-      <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: '#e4f6d7' }}> {/* Segundo color de myColor */}
-        <FileInput
-          label="Subir archivo .cer"
-          accept=".cer"
-          value={cerFile}
-          onChange={setCerFile}
-          styles={{
-            input: { backgroundColor: '#f1f3f5', color: '#000' },
-            label: { color: '#000' },
-          }}
-        />
-        <FileInput
-          label="Subir archivo .key"
-          value={keyFile}
-          onChange={setKeyFile}
-          styles={{
-            input: { backgroundColor: '#f1f3f5', color: '#000' },
-            label: { color: '#000' },
-          }}
-        />
-        <TextInput
-          label="Contraseña"
-          placeholder="Introdusca la contraseña"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.currentTarget.value)}
-          styles={{
-            input: { backgroundColor: '#f1f3f5', color: '#000' },
-            label: { color: '#000' },
-          }}
-        />
-        <Button mt="md" style={{ backgroundColor: 'blue', color: 'white' }} onClick={handleVerifyPassword}>
-          Verificar Contraseña
-        </Button>
-        {verificationStatus && <Notification color="green">{verificationStatus}</Notification>}
-        {errorMessage && <Notification color="red">{errorMessage}</Notification>}
-        <Button mt="md" style={{ backgroundColor: 'green', color: 'white' }} onClick={handleSign} disabled={!isPasswordValid}>
-          Firmar
-        </Button>
-      </Card>
-    </Container>
+    <Container fluid style={{ padding: 0, margin: 0, maxWidth: '100%', height: '100vh', display: 'flex', flexDirection: 'column' }}>
+  {/* Navbar con ancho total */}
+  <Group
+    position="apart"
+    align="center"
+    style={{
+      width: '100%',
+      padding: '16px',
+      backgroundColor: '#f0fce8',
+    }}
+  >
+    <img
+      src="/images/UdeC_2L izq Negro.png"
+      alt="Logo UdeC"
+      style={{ height: '40px', width: 'auto' }}
+    />
+    <Title order={1} style={{ fontFamily: 'Futura, sans-serif' }}>
+      Firmare
+    </Title>
+    <Button color="red" onClick={handleLogout}>
+      Cerrar Sesión
+    </Button>
+  </Group>
+
+  {/* Contenido principal */}
+  <div style={{ flex: 1, padding: '16px' }}>
+    {/* Título del PDF y botón "Regresar a Inicio" alineados */}
+    <Group position="apart" mb="md" align="center">
+      <Title order={1}>Firma: {fileName}</Title>
+      <Button
+        style={{ backgroundColor: theme.colors.myColor[1], color: theme.colors.dark[7] }}
+        onClick={() => router.push('/dashboard')}
+      >
+        Regresar a Inicio
+      </Button>
+    </Group>
+
+    {/* Contenedor del PDF */}
+    <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: '#e4f6d7', width: '80%', margin: '0 auto' }}>
+      <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
+        <div style={{ height: '400px' }}>
+          <Viewer fileUrl={fileUrl || ''} plugins={[defaultLayoutPluginInstance]} />
+        </div>
+      </Worker>
+    </Card>
+
+    {/* Formulario de firma */}
+    <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: '#e4f6d7', width: '80%', margin: '0 auto' }}>
+      <FileInput
+        label="Subir archivo .cer"
+        accept=".cer"
+        value={cerFile}
+        onChange={setCerFile}
+        styles={{
+          input: { backgroundColor: '#f1f3f5', color: '#000' },
+          label: { color: '#000' },
+        }}
+      />
+      <FileInput
+        label="Subir archivo .key"
+        value={keyFile}
+        onChange={setKeyFile}
+        styles={{
+          input: { backgroundColor: '#f1f3f5', color: '#000' },
+          label: { color: '#000' },
+        }}
+      />
+      <TextInput
+        label="Contraseña"
+        placeholder="Introduzca la contraseña"
+        type="password"
+        value={password}
+        onChange={(event) => setPassword(event.currentTarget.value)}
+        styles={{
+          input: { backgroundColor: '#f1f3f5', color: '#000' },
+          label: { color: '#000' },
+        }}
+      />
+      <Button mt="md" style={{ backgroundColor: 'blue', color: 'white' }} onClick={handleVerifyPassword}>
+        Verificar Contraseña
+      </Button>
+      {verificationStatus && <Notification color="green">{verificationStatus}</Notification>}
+      {errorMessage && <Notification color="red">{errorMessage}</Notification>}
+      <Button mt="md" style={{ backgroundColor: 'green', color: 'white' }} onClick={handleSign} disabled={!isPasswordValid}>
+        Firmar
+      </Button>
+    </Card>
+  </div>
+
+  {/* Footer con ancho total */}
+  <div style={{ width: '100%' }}>
+        <Footer />
+      </div>
+</Container>
+    
   );
 }

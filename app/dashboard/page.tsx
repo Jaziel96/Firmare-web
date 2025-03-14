@@ -6,6 +6,8 @@ import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import { showNotification } from "@mantine/notifications";
 import { supabase } from "@/lib/supabase";
 import { useSearchParams } from 'next/navigation';
+import Footer from '@/components/Footer';
+import { Tooltip } from '@mantine/core'; // Importar el componente Tooltip
 
 interface PdfFile {
   name: string;
@@ -298,107 +300,123 @@ export default function Dashboard() {
   }
 
   return (
-    <Container>
-      <Group position="apart" mb="md">
-        <img
-              src="/images/UdeC_2L izq Negro.png" // Ruta relativa desde la carpeta public
-              alt="Logo UdeC"
-              style={{
-                height: '40px', // Altura del logo
-                width: 'auto', // Mantener proporción
-              }}
-            />
-        <Title order={1}>Firmare</Title>
-        <Button color="red" onClick={handleLogout}>
-          Cerrar Sesión
-        </Button>
-      </Group>
-      <Dropzone
-        onDrop={handleUpload}
-        accept={[MIME_TYPES.pdf]}
-        styles={(theme) => ({
-          root: {
-            backgroundColor: "#e4f6d7",
-            border: `2px dashed ${theme.colors.blue[6]}`,
-            padding: theme.spacing.xl,
-            textAlign: "center",
-            color: "#000",
-            "&:hover": {
-              backgroundColor: "#f1f3f5",
-            },
-          },
-        })}
-      >
-        <Text style={{ textAlign: "center", color: "#000" }}>
-          Arrastra el PDF aquí o haz clic aquí para seleccionar el PDF
-        </Text>
-      </Dropzone>
-      <Table mt="md" highlightOnHover withBorder withColumnBorders>
-        <thead style={{ backgroundColor: "#e4f6d7", color: "#000" }}>
-          <tr>
-            <th style={{ borderColor: "#000", color: "#000" }}>Nombre</th>
-            <th style={{ borderColor: "#000", color: "#000" }}>
-              Fecha de Creación
-            </th>
-            <th style={{ borderColor: "#000", color: "#000" }}>Creado por</th>
-            <th style={{ borderColor: "#000", color: "#000" }}>
-              Fecha de Modificación
-            </th>
-            <th style={{ borderColor: "#000", color: "#000" }}>
-              Estado de Firma
-            </th>
-            <th style={{ borderColor: "#000", color: "#000" }}>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pdfFiles.map((file) => (
-            <tr
-              key={file.name}
-              style={{ borderColor: "#000", color: "#000" }}
-              onMouseEnter={(e) => (
-                (e.currentTarget.style.backgroundColor = "#e4f6d7"),
-                (e.currentTarget.style.color = "#000")
-              )}
-              onMouseLeave={(e) => (
-                (e.currentTarget.style.backgroundColor = ""),
-                (e.currentTarget.style.color = "#000")
-              )}
-            >
-              <td style={{ borderColor: "#000", color: "#000" }}>
-                {file.name}
-              </td>
-              <td style={{ borderColor: "#000", color: "#000" }}>
-                {new Date(file.uploadedat).toLocaleString()}
-              </td>
-              <td style={{ borderColor: "#000", color: "#000" }}>
-                {file.uploadedby}
-              </td>
-              <td style={{ borderColor: "#000", color: "#000" }}>
-                {new Date(file.modifiedat).toLocaleString()}
-              </td>
-              <td style={{ borderColor: "#000", color: "#000" }}>
-                {file.signaturestatus}
-              </td>
-              <td style={{ borderColor: "#000", color: "#000" }}>
-                <Button onClick={() => handleView(file.name)}>Ver</Button>
-                <Button color="red" onClick={() => handleDelete(file.name)}>
+    <Container fluid style={{ padding: 0, margin: 0, maxWidth: '100%', height: '100vh', display: 'flex', flexDirection: 'column' }}>
+  {/* Navbar */}
+  <Group position="apart" mb="md" align="center" style={{ padding: '16px', backgroundColor: '#f0fce8' }}>
+    <img
+      src="/images/UdeC_2L izq Negro.png"
+      alt="Logo UdeC"
+      style={{ height: '40px', width: 'auto' }}
+    />
+    <Title order={1} style={{ fontFamily: 'Futura, sans-serif' }}>
+      Firmare
+    </Title>
+    <Button color="red" onClick={handleLogout}>
+      Cerrar Sesión
+    </Button>
+  </Group>
+
+  {/* Dropzone con línea continua y cambio de color al pasar el mouse */}
+  <Dropzone
+    onDrop={handleUpload}
+    accept={[MIME_TYPES.pdf]}
+    styles={(theme) => ({
+      root: {
+        backgroundColor: 'white',
+        border: `2px solid #000`, // Línea continua
+        padding: theme.spacing.xl,
+        textAlign: 'center',
+        color: '#000',
+        margin: '0 16px 16px 16px',
+        transition: 'background-color 0.3s ease', // Transición suave
+        '&:hover': {
+          backgroundColor: '#e4f6d7', // Cambio de color al pasar el mouse
+        },
+      },
+    })}
+  >
+    <Text style={{ textAlign: 'center', color: '#000' }}>
+      Arrastra el PDF aquí o haz clic aquí para seleccionar el PDF
+    </Text>
+  </Dropzone>
+
+  {/* Tabla con contenido centrado */}
+  <div style={{ flex: 1, overflow: 'auto', padding: '0 16px' }}>
+    <Table highlightOnHover withBorder withColumnBorders style={{ tableLayout: 'auto', width: '100%' }}>
+      <thead style={{ backgroundColor: '#e4f6d7', color: '#000' }}>
+        <tr>
+          <th style={{ borderColor: '#000', color: '#000', textAlign: 'center', width: '30%', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Nombre</th>
+          <th style={{ borderColor: '#000', color: '#000', textAlign: 'center', width: '15%' }}>Fecha de Creación</th>
+          <th style={{ borderColor: '#000', color: '#000', textAlign: 'center', width: '15%' }}>Creado por</th>
+          <th style={{ borderColor: '#000', color: '#000', textAlign: 'center', width: '15%' }}>Fecha de Modificación</th>
+          <th style={{ borderColor: '#000', color: '#000', textAlign: 'center', width: '15%' }}>Estado de Firma</th>
+          <th style={{ borderColor: '#000', color: '#000', textAlign: 'center', width: '10%' }}>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {pdfFiles.map((file) => (
+          <tr
+            key={file.name}
+            style={{ borderColor: '#000', color: '#000' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#e4f6d7';
+              e.currentTarget.style.color = '#000';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '';
+              e.currentTarget.style.color = '#000';
+            }}
+          >
+            {/* Columna "Nombre" con tooltip */}
+            <td style={{ borderColor: '#000', color: '#000', textAlign: 'center', width: '30%', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <Tooltip label={file.name} position="top" withArrow>
+                <div style={{ cursor: 'pointer' }}>
+                  {file.name}
+                </div>
+              </Tooltip>
+            </td>
+            <td style={{ borderColor: '#000', color: '#000', textAlign: 'center', width: '15%' }}>
+              {new Date(file.uploadedat).toLocaleString('es-MX', {day: '2-digit', month: '2-digit', year: 'numeric',hour: '2-digit', minute: '2-digit', second: '2-digit',hour12: false})}
+            </td>
+            <td style={{ borderColor: '#000', color: '#000', textAlign: 'center', width: '15%' }}>
+              {file.uploadedby}
+            </td>
+            <td style={{ borderColor: '#000', color: '#000', textAlign: 'center', width: '15%' }}>
+              {new Date(file.modifiedat).toLocaleString('es-MX', {day: '2-digit', month: '2-digit', year: 'numeric',hour: '2-digit', minute: '2-digit', second: '2-digit',hour12: false})}
+            </td>
+            <td style={{ borderColor: '#000', color: '#000', textAlign: 'center', width: '15%' }}>
+              {file.signaturestatus}
+            </td>
+            {/* Columna "Acciones" con botones compactos */}
+            <td style={{ borderColor: '#000', color: '#000', textAlign: 'center', width: '10%' }}>
+              <Group spacing="xs" noWrap>
+                <Button size="xs" onClick={() => handleView(file.name)}>
+                  Ver
+                </Button>
+                <Button size="xs" color="red" onClick={() => handleDelete(file.name)}>
                   Borrar
                 </Button>
                 {file.signaturestatus === 'Firmado' && file.public_url && (
-                <Button
-                  color="blue"
-                  onClick={() => file.public_url && router.push(file.public_url)}
-                >
-                  Link Público
-                </Button>
+                  <Button
+                    size="xs"
+                    color="blue"
+                    onClick={() => file.public_url && router.push(file.public_url)}
+                  >
+                    Link Público
+                  </Button>
                 )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      {loading && <Text>Cargando...</Text>}
-      {error && <Text color="red">{error}</Text>}
-    </Container>
+              </Group>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  </div>
+  <Footer />
+  {/* Mensajes de carga y error */}
+  {loading && <Text style={{ padding: '16px', textAlign: 'center' }}>Cargando...</Text>}
+  {error && <Text color="red" style={{ padding: '16px', textAlign: 'center' }}>{error}</Text>}
+</Container>
+
   );
 }

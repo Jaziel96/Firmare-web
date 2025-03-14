@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Container, Title, Button, Group, Card, Text } from "@mantine/core";
+import { Container, Title, Button, Group, Card, Text, useMantineTheme } from "@mantine/core";
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabase";
 import Footer from "@/components/Footer";
 
 export default function ViewSignedPdf() {
+  const theme = useMantineTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
   const publicId = searchParams.get("id"); // Obtener el ID único
@@ -86,74 +87,91 @@ export default function ViewSignedPdf() {
 
   return (
     <>
-      <Container>
-        <Group align="apart" mb="md">
-          <img
-              src="\Firmare-web\public\images\UdeC_2L izq Negro.png" // Ruta relativa desde la carpeta public
-              alt="Logo UdeC"
-              style={{
-                height: '40px', // Altura del logo
-                width: 'auto', // Mantener proporción
-              }}
-            />
-          <Title order={1}>Documento Firmado</Title>
-          {isAuthenticated && (
-            <Button
-              style={{ backgroundColor: "gray" }}
-              onClick={() => router.push("/dashboard")}
-            >
-              Regresar
-            </Button>
-          )}
+  <Container fluid style={{ padding: 0, margin: 0, maxWidth: '100%', height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    {/* Navbar con ancho total */}
+    <Group
+      position="apart"
+      align="center"
+      style={{
+        width: '100%',
+        padding: '16px',
+        backgroundColor: '#f0fce8',
+      }}
+    >
+      <img
+        src="/images/UdeC_2L izq Negro.png"
+        alt="Logo UdeC"
+        style={{ height: '40px', width: 'auto' }}
+      />
+      <Title order={1} style={{ fontFamily: 'Futura, sans-serif' }}>
+        Firmare
+      </Title>
+      <Group spacing="xs">
+        {isAuthenticated && (
           <Button
-            style={{ backgroundColor: "blue" }}
-            onClick={() => router.push("/")}
+            style={{ backgroundColor: theme.colors.myColor[1], color: theme.colors.dark[7] }}
+            onClick={() => router.push("/dashboard")}
           >
-            Inicio
+            Regresar
           </Button>
-        </Group>
-
-        {/* Mostrar mensaje de error si existe */}
-        {error && (
-          <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: "#ffebee", border: "1px solid #e53935" }}>
-            <Text color="red">{error}</Text>
-          </Card>
         )}
+        <Button
+          style={{ backgroundColor: theme.colors.myColor[1], color: theme.colors.dark[7] }}
+          onClick={() => router.push("/")}
+        >
+          Inicio
+        </Button>
+      </Group>
+    </Group>
 
-        {/* Mostrar el visor de PDF si no hay errores */}
-        {!error && (
-          <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: "#e4f6d7", height: "150vh" }}>
-            {fileUrl ? (
-              <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
-                <div style={{ height: "100%", width: "100%" }}>
-                  <Viewer fileUrl={fileUrl} plugins={[defaultLayoutPluginInstance]} />
-                </div>
-              </Worker>
-            ) : (
-              <p>Cargando PDF firmado...</p>
-            )}
-          </Card>
-        )}
+    {/* Contenido principal */}
+    <div style={{ flex: 1, padding: '16px' }}>
+      {/* Mostrar mensaje de error si existe */}
+      {error && (
+        <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: "#ffebee", border: "1px solid #e53935" }}>
+          <Text color="red">{error}</Text>
+        </Card>
+      )}
 
-        {/* Cuadro adicional con los metadatos del certificado */}
-        {metadata && (
-          <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: "#ffffff", border: "1px solid #e0e0e0" }}>
-            <Text size="lg" weight={700} mb="sm" style={{ color: "#000000" }}>
-              Información de la Firma
-            </Text>
-            <Text style={{ color: "#000000" }}>
-              <strong>Firmado por:</strong> {metadata.nombre}
-            </Text>
-            <Text style={{ color: "#000000" }}>
-              <strong>Fecha:</strong> {metadata.fecha}
-            </Text>
-            <Text style={{ color: "#000000" }}>
-              <strong>Lugar:</strong> {metadata.lugar}
-            </Text>
-          </Card>
-        )}
-      </Container>
-      <Footer />
-    </>
+      {/* Mostrar el visor de PDF si no hay errores */}
+      {!error && (
+        <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: "#e4f6d7", height: "150vh",width: "80%", margin: '0 auto' }}>
+          {fileUrl ? (
+            <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
+              <div style={{ height: "100%", width: "100%" }}>
+                <Viewer fileUrl={fileUrl} plugins={[defaultLayoutPluginInstance]} />
+              </div>
+            </Worker>
+          ) : (
+            <p>Cargando PDF firmado...</p>
+          )}
+        </Card>
+      )}
+
+      {/* Cuadro adicional con los metadatos del certificado */}
+      {metadata && (
+        <Card mt="md" shadow="sm" padding="lg" style={{ backgroundColor: "#ffffff", border: "1px solid #e0e0e0", width: "80%", margin: '0 auto' }}>
+          <Text size="lg" weight={700} mb="sm" style={{ color: "#000000" }}>
+            Información de la Firma
+          </Text>
+          <Text style={{ color: "#000000" }}>
+            <strong>Firmado por:</strong> {metadata.nombre}
+          </Text>
+          <Text style={{ color: "#000000" }}>
+            <strong>Fecha:</strong> {metadata.fecha}
+          </Text>
+          <Text style={{ color: "#000000" }}>
+            <strong>Lugar:</strong> {metadata.lugar}
+          </Text>
+        </Card>
+      )}
+    </div>
+
+    {/* Footer con ancho total */}
+    <div style={{ width: '100%' }}>
+        <Footer />
+      </div>
+  </Container>
+</>
   );
 }
