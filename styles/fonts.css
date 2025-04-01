@@ -1,6 +1,38 @@
+/* src/styles/fonts.css */
+
+/* Myriad Pro */
 @font-face {
-    font-family: 'FuturaBT';
-    src: url('/components/typography/Futura/FuturaBT-Book.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-  }
+  font-family: 'Myriad Pro';
+  src: url('/typography/Myriad/MyriadPro-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Myriad Pro';
+  src: url('/typography/Myriad/MyriadPro-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Futura */
+@font-face {
+  font-family: 'Futura';
+  src: url('/typography/Futura/FuturaBT-Book.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Futura';
+  src: url('/typography/Futura/FuturaBT-BookItalic.otf') format('opentype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Futura';
+  src: url('/typography/Futura/Futura-BoldOblique.otf') format('opentype');
+  font-weight: bold;
+  font-style: italic;
+}

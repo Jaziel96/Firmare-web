@@ -5,10 +5,24 @@ import { ReactNode, useEffect, useState } from 'react';
 
 const theme: MantineThemeOverride = {
   colors: {
-    myColor: ['#f0fce8', '#e4f6d7', '#b3c7ff', '#8daaff', '#668dff', '#3f70ff', '#1953ff', '#0036e6', '#0029b3', '#001c80'],
+    myColor: [
+      '#f0fce8',
+      '#e4f6d7',
+      '#b3c7ff',
+      '#8daaff',
+      '#668dff',
+      '#3f70ff',
+      '#1953ff',
+      '#0036e6',
+      '#0029b3',
+      '#001c80',
+    ],
   },
   primaryColor: 'myColor',
-  fontFamily: 'FuturaBT, Arial, sans-serif', // Cambia 'FuturaBT' por el nombre de tu tipografía
+  fontFamily: 'Myriad Pro, Arial, sans-serif', // Fuente principal
+  headings: {
+    fontFamily: 'Futura, Arial, sans-serif', // Fuente para títulos
+  },
 };
 
 interface MantineProps {

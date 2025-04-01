@@ -4,9 +4,9 @@ const Footer = () => {
   return (
     <footer style={{ backgroundColor: '#f8f9fa', padding: '1rem 0', marginTop: 'auto' }}>
       <Container>
-        <Group justify="space-between">
+        <Group position="apart">
           <Text size="sm" color="dimmed">
-            © {new Date().getFullYear()} Mi Aplicación. Todos los derechos reservados.
+            © {new Date().getFullYear()} Firmare. Todos los derechos reservados.
           </Text>
           <Group>
             <Text size="sm" color="dimmed">

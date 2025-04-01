@@ -51,9 +51,22 @@ export default function Navbar() {
       }}
     >
       <Group position="apart" style={{ width: '100%' }}>
-        <Text size="xl" fw={700}>
-          Firmare
-        </Text>
+        {/* Logo y Título */}
+        <Group spacing="xs">
+          <img
+            src="/images/UdeC_2L izq Negro.png" // Ruta relativa desde la carpeta public
+            alt="Logo UdeC"
+            style={{
+              height: '40px', // Altura del logo
+              width: 'auto', // Mantener proporción
+            }}
+          />
+          <Text size="xl" fw={700}>
+            Firmare
+          </Text>
+        </Group>
+
+        {/* Botones de Navegación */}
         <Group>
           <Button variant="filled" style={{ backgroundColor: '#e4f6d7', color: '#000000' }} component="a" href="/">
             Inicio
