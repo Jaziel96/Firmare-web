@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { Container, Title, Button, Group, Text, Table } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
@@ -8,6 +8,8 @@ import { supabase } from "@/lib/supabase";
 import { useSearchParams } from 'next/navigation';
 import Footer from '@/components/Footer';
 import { Tooltip } from '@mantine/core'; // Importar el componente Tooltip
+
+export const dynamic = "force-dynamic";
 
 interface PdfFile {
   name: string;
@@ -30,6 +32,15 @@ function normalizeFileName(fileName: string): string {
 }
 
 export default function Dashboard() {
+  return (
+    <Suspense fallback={<Text>Cargando parámetros...</Text>}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+
+function DashboardContent() {
   const [pdfFiles, setPdfFiles] = useState<PdfFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

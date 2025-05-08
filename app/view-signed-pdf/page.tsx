@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Container, Title, Button, Group, Card, Text, useMantineTheme } from "@mantine/core";
 import { Worker, Viewer } from "@react-pdf-viewer/core";
@@ -10,7 +10,19 @@ import * as pdfjsLib from "pdfjs-dist";
 import { supabase } from "@/lib/supabase";
 import Footer from "@/components/Footer";
 
+export const dynamic = "force-dynamic";
+
 export default function ViewSignedPdf() {
+  return (
+    <Suspense fallback={<Text>Cargando parámetros...</Text>}>
+      <ViewSignedPdfContent />
+    </Suspense>
+  );
+}
+
+
+
+function ViewSignedPdfContent() {
   const theme = useMantineTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
