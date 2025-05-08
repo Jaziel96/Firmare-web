@@ -1,6 +1,7 @@
 // next.config.js
 module.exports = {
   webpack: (config, { isServer }) => {
+    // Excluir módulos de Node.js en el cliente
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -9,17 +10,20 @@ module.exports = {
         path: false,
         crypto: false,
       };
+      
+      // 👇 Añade esto para bloquear completamente canvas
+      config.externals = {
+        ...config.externals,
+        canvas: "commonjs canvas"
+      };
     }
 
-    // Captura la entrada original ANTES de modificarla
+    // Polyfill para Promise.withResolvers
     const originalEntry = config.entry;
-    config.entry = async () => {
-      const entries = await originalEntry();
-      return {
-        ...entries,
-        './polyfills.js': './polyfills.js',
-      };
-    };
+    config.entry = async () => ({
+      ...(await originalEntry()),
+      './polyfills.js': './polyfills.js',
+    });
 
     return config;
   },
