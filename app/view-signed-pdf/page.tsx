@@ -6,9 +6,12 @@ import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
+import { GlobalWorkerOptions } from 'pdfjs-dist';
 import * as pdfjsLib from "pdfjs-dist";
 import { supabase } from "@/lib/supabase";
 import Footer from "@/components/Footer";
+
+GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 export const dynamic = "force-dynamic";
 
@@ -151,7 +154,7 @@ function ViewSignedPdfContent() {
           {fileUrl ? (
             <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
               <div style={{ height: "100%", width: "100%" }}>
-                <Viewer fileUrl={fileUrl} plugins={[defaultLayoutPluginInstance]} />
+                <Viewer fileUrl={fileUrl || ''} plugins={[defaultLayoutPluginInstance]} />
               </div>
             </Worker>
           ) : (

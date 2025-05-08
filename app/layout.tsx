@@ -1,3 +1,5 @@
+// app/layout.tsx
+import '../polyfills'; // 👈 Importa el polyfill aquí (primera línea)
 import { Mantine } from '@/lib/mantine';
 import '../styles/fonts.css';
 
