@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Container, Title, Button, Group, Card, TextInput, FileInput, Notification, Text, useMantineTheme } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
@@ -17,7 +17,19 @@ import crypto from 'crypto';
 import { supabase } from "@/lib/supabase";
 import Footer from '@/components/Footer';
 
+export const dynamic = "force-dynamic";
+
 export default function SignPdfComponent() {
+  return (
+    <Suspense fallback={<Text>Cargando parámetros...</Text>}>
+      <SignPdfComponentContent />
+    </Suspense>
+  );
+}
+
+
+
+function SignPdfComponentContent() {
   const theme = useMantineTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
