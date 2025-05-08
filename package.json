@@ -67,5 +67,8 @@
     "tailwindcss": "3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.3.3"
+  },
+  "optionalDependencies": {
+    "canvas": "^3.1.0"
   }
 }

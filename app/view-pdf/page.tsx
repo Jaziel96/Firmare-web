@@ -9,6 +9,9 @@ import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import * as pdfjsLib from 'pdfjs-dist';
 import { supabase } from "@/lib/supabase";
 import Footer from '@/components/Footer';
+// Antes de importar pdfjsLib
+import { GlobalWorkerOptions } from 'pdfjs-dist';
+GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 export const dynamic = "force-dynamic";
 
