@@ -14,14 +14,17 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "baseUrl": ".", // 👈 Agrega esta línea
+    "paths": {
+      "@/*": ["./*"], // Mantén esto
+      "@/components/*": ["components/*"], // 👈 Define rutas específicas
+      "@/lib/*": ["lib/*"]
+    },
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": ["./*"]
-    }
+    ]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
