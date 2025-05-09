@@ -36,7 +36,7 @@
     "@tiptap/extension-link": "^2.10.3",
     "@tiptap/react": "^2.10.3",
     "@tiptap/starter-kit": "^2.10.3",
-    "autoprefixer": "10.4.17",
+    "autoprefixer": "^10.4.21",
     "canvas": "^3.1.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -50,11 +50,15 @@
     "node-signpdf": "^3.0.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^2.16.105",
+    "postcss": "^8.5.3",
+    "postcss-preset-mantine": "^1.17.0",
+    "postcss-simple-vars": "^7.0.1",
     "prettier": "^3.3.3",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "swiper": "^11.1.14",
+    "tailwindcss": "^4.1.6",
     "uuid": "^11.0.3"
   },
   "devDependencies": {
@@ -64,11 +68,7 @@
     "@types/react": "18.2.46",
     "@types/react-dom": "18.2.18",
     "@types/swiper": "^5.4.3",
-    "postcss": "^8.4.49",
-    "postcss-preset-mantine": "^1.17.0",
-    "postcss-simple-vars": "^7.0.1",
     "tailwind-merge": "^2.5.2",
-    "tailwindcss": "3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.3.3"
   }
