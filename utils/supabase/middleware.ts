@@ -49,6 +49,8 @@ export const updateSession = async (request: NextRequest) => {
       return NextResponse.redirect(new URL("/protected", request.url));
     }
 
+
+    
     return response;
   } catch (e) {
     // If you are here, a Supabase client could not be created!
