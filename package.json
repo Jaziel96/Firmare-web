@@ -3,13 +3,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "postinstall": "craco build" 
+    "start": "next start"
+    
   },
   "engines": {
     "node": ">=20.11.0"
   },
-
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/server": "^11.11.0",
@@ -30,8 +29,8 @@
     "@radix-ui/react-dropdown-menu": "^2.1.1",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
-    "@react-pdf-viewer/default-layout": "^3.12.0",
     "@react-pdf-viewer/core": "^3.12.0",
+    "@react-pdf-viewer/default-layout": "^3.12.0",
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
     "@tabler/icons-react": "^3.24.0",
@@ -71,6 +70,5 @@
     "tailwindcss": "3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.3.3"
-  }  
+  }
 }
-
