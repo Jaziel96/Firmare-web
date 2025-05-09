@@ -13,7 +13,6 @@ import { PDFDocument, rgb } from 'pdf-lib';
 import forge from 'node-forge';
 import { v4 as uuidv4 } from 'uuid';
 import QRCode from 'qrcode';
-import crypto from 'crypto';
 import { supabase } from "@/lib/supabase";
 import Footer from '@/components/Footer';
 
@@ -113,10 +112,13 @@ function SignPdfComponentContent() {
   };
 
   // Generar el hash de la cadena original
-  const generarHash = (cadenaOriginal: string) => {
-    const hash = crypto.createHash('sha256');
-    hash.update(cadenaOriginal, 'utf8');
-    return hash.digest('hex');
+  const generarHash = async (cadenaOriginal: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(cadenaOriginal);
+    const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer)); // Convertir buffer a array de bytes
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // Convertir bytes a string hexadecimal
+    return hashHex;
   };
 
   // Crear la firma electrónica avanzada
@@ -139,6 +141,7 @@ function SignPdfComponentContent() {
 
       const cerArrayBuffer = await cerFile.arrayBuffer();
       const keyArrayBuffer = await keyFile.arrayBuffer();
+      
 
       const keyPem = new TextDecoder().decode(keyArrayBuffer);
       const privateKey = forge.pki.decryptRsaPrivateKey(keyPem, password);
@@ -185,8 +188,20 @@ function SignPdfComponentContent() {
       const publicId = uuidv4();
 
       // Crear el enlace público
-      const publicUrl = `https://wpph6dmr-3000.usw3.devtunnels.ms/view-signed-pdf?id=${publicId}`;
+      const getBaseUrl = () => {
+        if (process.env.NEXT_PUBLIC_VERCEL_URL) { // Variable de entorno de Vercel para URL de despliegue
+          return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+        }
+        if (process.env.NEXT_PUBLIC_SITE_URL) { // Variable que puedes definir tú
+          return process.env.NEXT_PUBLIC_SITE_URL;
+        }
+        // Fallback para desarrollo local
+        return 'http://localhost:3000';
+      };
 
+      const baseUrl = getBaseUrl();
+      const publicUrl = `${baseUrl}/view-signed-pdf?id=${publicId}`;
+      
       // Guardar la cadena original en la base de datos
       const { error: updateError1 } = await supabase
         .from('pdf_metadata')
@@ -204,7 +219,7 @@ function SignPdfComponentContent() {
       }
 
       // Generar el hash de la cadena original
-      const hash = generarHash(cadenaOriginal);
+      const hash = await generarHash(cadenaOriginal);
 
       // Firmar el hash
       const firma = firmarHash(hash, keyPem, password);

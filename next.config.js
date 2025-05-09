@@ -8,6 +8,7 @@ module.exports = {
       ...config.resolve.alias,
       '@/components': path.resolve(__dirname, 'components'),
       '@/lib': path.resolve(__dirname, 'lib'),
+
     };
 
     if (!isServer) {
@@ -16,14 +17,12 @@ module.exports = {
         canvas: false,
         fs: false,
         path: false,
-        crypto: false,
+        
       };
     }
 
-    const originalEntry = config.entry;
-    config.entry = async () => ({
-      ...(await originalEntry()),
-      './polyfills.js': './polyfills.js',
+    config.externals.push({
+      canvas: 'commonjs canvas'
     });
 
     return config;
