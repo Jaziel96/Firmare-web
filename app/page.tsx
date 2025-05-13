@@ -1,5 +1,6 @@
 "use client";
 
+
 import { Container } from '@mantine/core';
 import dynamic from 'next/dynamic';
 import Footer from '@/components/Footer';

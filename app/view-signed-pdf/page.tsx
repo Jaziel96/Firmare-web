@@ -1,16 +1,33 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import { GlobalWorkerOptions } from 'pdfjs-dist';
+import * as pdfjsLib from 'pdfjs-dist';
+GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+
+import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Container, Title, Button, Group, Card, Text, useMantineTheme } from "@mantine/core";
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
-import * as pdfjsLib from "pdfjs-dist";
 import { supabase } from "@/lib/supabase";
 import Footer from "@/components/Footer";
 
+
+export const dynamic = "force-dynamic";
+
 export default function ViewSignedPdf() {
+  return (
+    <Suspense fallback={<Text>Cargando parámetros...</Text>}>
+      <ViewSignedPdfContent />
+    </Suspense>
+  );
+}
+
+
+
+function ViewSignedPdfContent() {
   const theme = useMantineTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -139,7 +156,7 @@ export default function ViewSignedPdf() {
           {fileUrl ? (
             <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
               <div style={{ height: "100%", width: "100%" }}>
-                <Viewer fileUrl={fileUrl} plugins={[defaultLayoutPluginInstance]} />
+                <Viewer fileUrl={fileUrl || ''} plugins={[defaultLayoutPluginInstance]} />
               </div>
             </Worker>
           ) : (
