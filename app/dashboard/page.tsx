@@ -408,10 +408,31 @@ function DashboardContent() {
                   Borrar
                 </Button>
                 {file.signaturestatus === 'Firmado' && file.public_url && (
-                  <Button
+                   <Button
                     size="xs"
                     color="blue"
-                    onClick={() => file.public_url && router.push(file.public_url)}
+                    onClick={() => {
+                      if (file.public_url) {
+                        const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL;
+                        if (!appBaseUrl) {
+                          console.error("Error: NEXT_PUBLIC_APP_URL no está configurado.");
+                          showNotification({
+                            title: "Error de Configuración",
+                            message: "La URL base de la aplicación no está configurada. Contacte al administrador.",
+                            color: "red",
+                          });
+                          return;
+                        }
+                       
+                        const path = file.public_url.startsWith('/') ? file.public_url : `/${file.public_url}`;
+                        const fullUrl = `${appBaseUrl}${path}`;
+                        
+                     
+                        router.push(fullUrl);
+
+                       
+                      }
+                    }}
                   >
                     Link Público
                   </Button>
