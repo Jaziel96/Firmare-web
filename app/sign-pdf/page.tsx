@@ -161,12 +161,12 @@ function SignPdfComponentContent() {
       const cert = forge.pki.certificateFromPem(cerPem);
       const subject = cert.subject.attributes.find(attr => attr.name === 'commonName')?.value || 'Unknown';
       const currentDate = new Date().toLocaleString();
-      const uuid = uuidv4(); // UUID para información en el PDF, no para la URL pública necesariamente
+      const uuid = uuidv4(); 
 
       // Generar un ID único para el enlace público
-      const publicId = uuidv4(); // Este SÍ es para la URL pública
+      const publicId = uuidv4(); 
       
-      // ---- MODIFICACIÓN IMPORTANTE AQUÍ ----
+  
       // Construir la RUTA RELATIVA para public_url
       const relativePublicUrl = `/view-signed-pdf?id=${publicId}`;
       // ------------------------------------
@@ -188,7 +188,7 @@ function SignPdfComponentContent() {
               message: "La URL base de la aplicación no está configurada para el QR. Contacte al administrador.",
               color: "red",
           });
-          // Podrías decidir continuar sin QR o detenerte
+          
       }
       const qrCodeFullPublicUrl = appProdBaseUrl ? `${appProdBaseUrl}${relativePublicUrl}` : relativePublicUrl; // Fallback a ruta relativa si no hay URL base
 
@@ -245,8 +245,7 @@ function SignPdfComponentContent() {
 
       if (uploadError) throw new Error(`Error al subir PDF firmado: ${uploadError.message}`);
 
-      // ---- MODIFICACIÓN IMPORTANTE AQUÍ ----
-      // Actualizar metadatos con la RUTA RELATIVA para public_url
+      
       const { error: updateError } = await supabase
         .from('pdf_metadata')
         .update({
